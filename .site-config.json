@@ -2,18 +2,18 @@
   "sites": {
     "storage": {
       "name": "云盘1",
-      "announcement": "666",
-      "closed": true
+      "announcement": "",
+      "closed": false
     },
     "cloud2": {
       "name": "云盘2",
       "announcement": "",
-      "closed": true
+      "closed": false
     },
     "img": {
       "name": "图床",
       "announcement": "",
-      "closed": true
+      "closed": false
     },
     "reader": {
       "name": "阅读器",
@@ -21,5 +21,5 @@
       "closed": true
     }
   },
-  "updated": "2026-11-21T08:49:24.950Z"
+  "updated": "2026-11-21T08:50:04.194Z"
 }
