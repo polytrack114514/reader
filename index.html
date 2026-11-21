@@ -531,6 +531,7 @@
           <button class="btn sm ghost" id="clearTokenBtn" type="button">清除</button>
         </div>
         <div class="hint-sm" id="tokenState">令牌只保存在本机浏览器，仅用于调用 GitHub API。</div>
+        <div class="hint-sm">还没有令牌？到 <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">GitHub 令牌设置</a> 创建：Fine-grained 选 reader 仓库并给 Contents 读写，或经典令牌勾选 repo。</div>
         <div class="uploadrow">
           <button class="btn sm" id="pickUploadBtn" type="button">选择要上传的文件</button>
           <input type="file" id="uploadInput" multiple hidden />
@@ -610,11 +611,13 @@
 | 文档 | `.pdf` | 内嵌阅读 |
 | 音视频 | `.mp4` `.webm` `.mp3` 等 | 内置播放器 |
 
-## 三种打开方式
+## 打开方式
 
 1. 把文件直接拖进页面
 2. 点击选择本地文件（不会上传）
-3. 粘贴一个文件链接，例如云盘2 的下载地址
+3. 浏览本地文件夹，按目录树挑选文件
+4. 粘贴一个文件链接，例如云盘2 的下载地址
+5. 保存 GitHub 令牌后，把文件上传到 reader 仓库，随时在线阅读
 
 > 链接需要目标服务器允许跨域（CORS）。云盘2 的下载地址已经支持，所以可以直接把云盘里的 Markdown 粘过来读。
 
