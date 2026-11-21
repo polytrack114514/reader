@@ -195,6 +195,7 @@
 
   .reader { display: grid; grid-template-columns: 196px minmax(0, 1fr); gap: 30px; align-items: start; }
   .reader.hide-toc aside { display: none; }
+  .reader.no-toc { grid-template-columns: minmax(0, 1fr); }
   .toc {
     position: sticky; top: 72px; max-height: calc(100vh - 92px); overflow: auto;
     border-left: 1px solid var(--border); padding: 2px 0 2px 14px;
@@ -212,6 +213,7 @@
   .toc a.toc-h3 { padding-left: 26px; font-size: 12px; }
 
   .doc { min-width: 0; max-width: 800px; }
+  .doc.wide { max-width: none; }
 
   /* 正文（Markdown） */
   .md { font-size: 15.5px; line-height: 1.85; color: var(--text); word-wrap: break-word; }
@@ -804,6 +806,12 @@ files.forEach((name) => {
     }
   }
 
+  function setTocVisible(v) {
+    els.toc.hidden = !v;
+    els.tocBtn.hidden = !v;
+    els.reader.classList.toggle('no-toc', !v);
+  }
+
   function resetDoc() {
     revoke();
     if (tocObserver) { tocObserver.disconnect(); tocObserver = null; }
@@ -817,9 +825,8 @@ files.forEach((name) => {
     state.binaryMsg = '';
     els.doc.className = 'doc';
     els.doc.replaceChildren();
-    els.toc.hidden = true;
+    setTocVisible(false);
     els.tocNav.replaceChildren();
-    els.tocBtn.hidden = true;
     els.sourceBtn.hidden = true;
     els.copyBtn.hidden = true;
     els.reader.classList.remove('hide-toc');
@@ -878,8 +885,7 @@ files.forEach((name) => {
     var heads = els.doc.querySelectorAll('h1, h2, h3');
     els.tocNav.replaceChildren();
     if (!heads.length) {
-      els.toc.hidden = true;
-      els.tocBtn.hidden = true;
+      setTocVisible(false);
       return;
     }
     var used = {};
@@ -899,8 +905,7 @@ files.forEach((name) => {
       a.title = a.textContent;
       els.tocNav.appendChild(a);
     });
-    els.toc.hidden = false;
-    els.tocBtn.hidden = false;
+    setTocVisible(true);
 
     var links = Array.prototype.slice.call(els.tocNav.querySelectorAll('a'));
     if (tocObserver) tocObserver.disconnect();
@@ -930,8 +935,7 @@ files.forEach((name) => {
     if (!text.trim()) {
       els.doc.classList.add('md');
       els.doc.innerHTML = '<div class="empty-doc">这个文件是空的。</div>';
-      els.toc.hidden = true;
-      els.tocBtn.hidden = true;
+      setTocVisible(false);
       return;
     }
     if (!window.marked || !window.DOMPurify) {
@@ -975,8 +979,7 @@ files.forEach((name) => {
     pre.appendChild(code);
     els.doc.replaceChildren(pre);
     highlight();
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    setTocVisible(false);
   }
 
   function renderImage() {
@@ -996,8 +999,7 @@ files.forEach((name) => {
     note.textContent = '点击图片可在新标签页查看原图。';
     box.appendChild(note);
     els.doc.replaceChildren(box);
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    setTocVisible(false);
   }
 
   function renderPdf() {
@@ -1012,8 +1014,7 @@ files.forEach((name) => {
     note.innerHTML = '在浏览器里无法显示？<a href="' + state.blobUrl + '" target="_blank" rel="noopener">在新标签页打开</a>';
     box.appendChild(note);
     els.doc.replaceChildren(box);
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    setTocVisible(false);
   }
 
   function renderVideo() {
@@ -1023,8 +1024,7 @@ files.forEach((name) => {
     v.playsInline = true;
     v.src = state.blobUrl;
     els.doc.replaceChildren(v);
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    setTocVisible(false);
   }
 
   function renderAudio() {
@@ -1033,8 +1033,7 @@ files.forEach((name) => {
     a.controls = true;
     a.src = state.blobUrl;
     els.doc.replaceChildren(a);
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    setTocVisible(false);
   }
 
   function renderBinary(msg) {
@@ -1053,14 +1052,16 @@ files.forEach((name) => {
     a.textContent = '下载文件';
     box.appendChild(a);
     els.doc.replaceChildren(box);
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    setTocVisible(false);
   }
 
   function renderDoc() {
     els.doc.className = 'doc';
-    els.toc.hidden = true;
-    els.tocBtn.hidden = true;
+    if (state.kind === 'image' || state.kind === 'pdf' || state.kind === 'video' ||
+        state.kind === 'audio' || state.kind === 'binary') {
+      els.doc.classList.add('wide');
+    }
+    setTocVisible(false);
     els.copyBtn.hidden = state.kind !== 'md' && state.kind !== 'text';
     els.sourceBtn.hidden = state.kind !== 'md';
     els.sourceBtn.textContent = state.source ? '预览' : '源码';
