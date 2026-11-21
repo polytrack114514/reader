@@ -524,14 +524,7 @@
 
       <div class="sect">
         <div class="sect-title">上传文件到仓库</div>
-        <div class="tokenrow">
-          <input id="tokenInput" type="password" spellcheck="false" autocomplete="off"
-            placeholder="GitHub 令牌（Token），需要 reader 仓库的 Contents 读写权限" />
-          <button class="btn sm" id="saveTokenBtn" type="button">保存令牌</button>
-          <button class="btn sm ghost" id="clearTokenBtn" type="button">清除</button>
-        </div>
-        <div class="hint-sm" id="tokenState">令牌只保存在本机浏览器，仅用于调用 GitHub API。</div>
-        <div class="hint-sm">还没有令牌？到 <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">GitHub 令牌设置</a> 创建：Fine-grained 选 reader 仓库并给 Contents 读写，或经典令牌勾选 repo。</div>
+        <div class="hint-sm" id="tokenState">已接入云端代理，无需填写令牌；文件保存到仓库的 <b>uploads</b> 目录，单个不超过 25MB。</div>
         <div class="uploadrow">
           <button class="btn sm" id="pickUploadBtn" type="button">选择要上传的文件</button>
           <input type="file" id="uploadInput" multiple hidden />
@@ -617,7 +610,7 @@
 2. 点击选择本地文件（不会上传）
 3. 浏览本地文件夹，按目录树挑选文件
 4. 粘贴一个文件链接，例如云盘2 的下载地址
-5. 保存 GitHub 令牌后，把文件上传到 reader 仓库，随时在线阅读
+5. 把文件上传到 reader 仓库（已接入云端，无需令牌），随时在线阅读
 
 > 链接需要目标服务器允许跨域（CORS）。云盘2 的下载地址已经支持，所以可以直接把云盘里的 Markdown 粘过来读。
 
@@ -692,10 +685,6 @@ files.forEach((name) => {
     clearFolderBtn: $('#clearFolderBtn'),
     repoList: $('#repoList'),
     refreshRepoBtn: $('#refreshRepoBtn'),
-    tokenInput: $('#tokenInput'),
-    saveTokenBtn: $('#saveTokenBtn'),
-    clearTokenBtn: $('#clearTokenBtn'),
-    tokenState: $('#tokenState'),
     pickUploadBtn: $('#pickUploadBtn'),
     uploadInput: $('#uploadInput'),
     uploadDir: $('#uploadDir'),
@@ -731,7 +720,7 @@ files.forEach((name) => {
   };
 
   var REPO = { owner: 'polytrack114514', name: 'reader', branch: 'main' };
-  var TOKEN_KEY = 'rd_token';
+  var API_BASE = 'https://file-cloud-2.pages.dev';
   var MAX_UPLOAD = 25 * 1024 * 1024;
   var MAX_SCAN = 3000;
 
@@ -1362,36 +1351,9 @@ files.forEach((name) => {
   }
 
   /* ---------- 阅读器仓库 ---------- */
-  function getToken() {
-    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
-  }
-
-  function apiHeaders(extra) {
-    var h = {
-      'Accept': 'application/vnd.github+json',
-      'X-GitHub-Api-Version': '2022-11-28'
-    };
-    var t = getToken();
-    if (t) h.Authorization = 'Bearer ' + t;
-    if (extra) for (var k in extra) h[k] = extra[k];
-    return h;
-  }
-
   function repoRawUrl(path) {
     return 'https://raw.githubusercontent.com/' + REPO.owner + '/' + REPO.name + '/' + REPO.branch + '/' +
       path.split('/').map(encodeURIComponent).join('/');
-  }
-
-  function renderTokenState() {
-    var t = getToken();
-    els.tokenInput.value = '';
-    if (t) {
-      els.tokenInput.placeholder = '已保存令牌（输入新令牌可替换）';
-      els.tokenState.textContent = '已保存令牌（仅本机），可以上传文件。';
-    } else {
-      els.tokenInput.placeholder = 'GitHub 令牌（Token），需要 reader 仓库的 Contents 读写权限';
-      els.tokenState.textContent = '令牌只保存在本机浏览器，仅用于调用 GitHub API。';
-    }
   }
 
   function renderRepoFiles() {
@@ -1434,12 +1396,11 @@ files.forEach((name) => {
     loading.textContent = '正在读取…';
     els.repoList.appendChild(loading);
     try {
-      var r = await fetch('https://api.github.com/repos/' + REPO.owner + '/' + REPO.name +
-        '/git/trees/' + REPO.branch + '?recursive=1', { headers: apiHeaders() });
-      if (r.status === 403 || r.status === 429) throw new Error('接口限流，保存令牌后可提高额度');
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      var data = await r.json();
-      state.repoFiles = (data.tree || []).filter(function (x) { return x.type === 'blob'; })
+      var r = await fetch(API_BASE + '/reader/tree');
+      var data = null;
+      try { data = await r.json(); } catch (e) {}
+      if (!r.ok) throw new Error((data && data.error) || ('HTTP ' + r.status));
+      state.repoFiles = (data.files || [])
         .sort(function (a, b) { return a.path.localeCompare(b.path, 'zh-CN'); });
       renderRepoFiles();
     } catch (e) {
@@ -1452,25 +1413,13 @@ files.forEach((name) => {
   }
 
   /* ---------- 上传到仓库 ---------- */
-  function fileToBase64(file) {
-    return new Promise(function (resolve, reject) {
-      var fr = new FileReader();
-      fr.onload = function () {
-        var s = String(fr.result || '');
-        var i = s.indexOf(',');
-        resolve(i >= 0 ? s.slice(i + 1) : s);
-      };
-      fr.onerror = function () { reject(fr.error || new Error('读取文件失败')); };
-      fr.readAsDataURL(file);
-    });
-  }
-
   function apiErrorText(status, msg) {
-    if (status === 401) return '令牌无效或已过期';
-    if (status === 403) return '无写入权限（令牌需含 reader 仓库 Contents 读写）';
-    if (status === 404) return '仓库或路径不存在';
-    if (status === 422) return '请求被拒绝（可能同名冲突或文件过大）';
-    return 'HTTP ' + status + (msg ? ' · ' + msg : '');
+    if (status === 409) return '同名文件已存在';
+    if (status === 413) return '文件超过 25MB';
+    if (status === 403) return '上传被拒绝（来源限制）';
+    if (status === 400) return '路径无效，只能上传到 uploads 目录';
+    if (status === 502) return msg || '仓库写入失败';
+    return msg || ('HTTP ' + status);
   }
 
   function addLog(name) {
@@ -1512,31 +1461,17 @@ files.forEach((name) => {
       setLog(item, 'err', '超过 25MB，建议使用云盘2');
       return;
     }
-    var api = 'https://api.github.com/repos/' + REPO.owner + '/' + REPO.name + '/contents/' +
-      path.split('/').map(encodeURIComponent).join('/');
+    var target = API_BASE + '/reader/upload?path=' + encodeURIComponent(path) +
+      '&overwrite=' + (overwrite ? '1' : '0');
     try {
-      var sha = null;
-      var head = await fetch(api, { headers: apiHeaders() });
-      if (head.ok) {
-        if (!overwrite) { setLog(item, 'err', '同名文件已存在'); return; }
-        var meta = await head.json();
-        sha = meta.sha;
-      } else if (head.status !== 404) {
-        throw { status: head.status };
-      }
-      var b64 = await fileToBase64(file);
-      var body = { message: 'Upload ' + path, content: b64, branch: REPO.branch };
-      if (sha) body.sha = sha;
-      var r = await fetch(api, {
-        method: 'PUT',
-        headers: apiHeaders({ 'Content-Type': 'application/json' }),
-        body: JSON.stringify(body)
+      var r = await fetch(target, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/octet-stream' },
+        body: file
       });
-      if (!r.ok) {
-        var j = null;
-        try { j = await r.json(); } catch (e) {}
-        throw { status: r.status, message: j && j.message ? j.message : '' };
-      }
+      var data = null;
+      try { data = await r.json(); } catch (e) {}
+      if (!r.ok) throw { status: r.status, message: data && data.error ? data.error : '' };
       setLogDone(item, path);
     } catch (e) {
       if (e && e.status) setLog(item, 'err', apiErrorText(e.status, e.message));
@@ -1545,18 +1480,14 @@ files.forEach((name) => {
   }
 
   async function uploadAll() {
-    var token = getToken();
-    if (!token) {
-      toast('请先保存 GitHub 令牌');
-      els.tokenInput.focus();
-      return;
-    }
     var files = Array.prototype.slice.call(els.uploadInput.files || []);
     if (!files.length) {
       toast('请先选择要上传的文件');
       return;
     }
     var dir = String(els.uploadDir.value || '').trim().replace(/^\/+|\/+$/g, '');
+    if (!dir) dir = 'uploads';
+    if (dir !== 'uploads' && dir.indexOf('uploads/') !== 0) dir = 'uploads/' + dir;
     var overwrite = els.overwriteChk.checked;
     els.uploadBtn.disabled = true;
     els.uploadLog.replaceChildren();
@@ -1600,20 +1531,6 @@ files.forEach((name) => {
   });
 
   els.refreshRepoBtn.addEventListener('click', loadRepoFiles);
-  els.saveTokenBtn.addEventListener('click', function () {
-    var t = els.tokenInput.value.trim();
-    if (!t) { toast('请粘贴 GitHub 令牌'); els.tokenInput.focus(); return; }
-    try { localStorage.setItem(TOKEN_KEY, t); } catch (e) {}
-    renderTokenState();
-    toast('令牌已保存到本机');
-    loadRepoFiles();
-  });
-  els.clearTokenBtn.addEventListener('click', function () {
-    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
-    renderTokenState();
-    toast('令牌已清除');
-    loadRepoFiles();
-  });
   els.pickUploadBtn.addEventListener('click', function () { els.uploadInput.click(); });
   els.uploadInput.addEventListener('change', function () {
     var n = els.uploadInput.files ? els.uploadInput.files.length : 0;
@@ -1705,7 +1622,6 @@ files.forEach((name) => {
 
   /* ---------- 初始化 ---------- */
   renderRecent();
-  renderTokenState();
   renderLocalTree();
   loadRepoFiles();
 
