@@ -1497,7 +1497,7 @@ files.forEach((name) => {
     item.row.className = 'urow ok';
     item.stat.textContent = '已上传 · ';
     var a = document.createElement('a');
-    a.href = repoRawUrl(path);
+    a.href = 'https://polytrack114514.github.io/reader/?url=' + encodeURIComponent(repoRawUrl(path));
     a.textContent = '打开';
     a.target = '_blank';
     a.rel = 'noopener';
