@@ -1,0 +1,25 @@
+{
+  "sites": {
+    "storage": {
+      "name": "云盘1",
+      "announcement": "",
+      "closed": false
+    },
+    "cloud2": {
+      "name": "云盘2",
+      "announcement": "414",
+      "closed": false
+    },
+    "img": {
+      "name": "图床",
+      "announcement": "",
+      "closed": false
+    },
+    "reader": {
+      "name": "阅读器",
+      "announcement": "",
+      "closed": false
+    }
+  },
+  "updated": "2026-11-21T08:40:48.661Z"
+}
