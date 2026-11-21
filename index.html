@@ -1418,7 +1418,12 @@ files.forEach((name) => {
     if (status === 413) return '文件超过 25MB';
     if (status === 403) return '上传被拒绝（来源限制）';
     if (status === 400) return '路径无效，只能上传到 uploads 目录';
-    if (status === 502) return msg || '仓库写入失败';
+    if (status === 502) {
+      if (/not accessible|personal access token/i.test(msg || '')) {
+        return '服务端令牌缺少 reader 写权限，请给云盘2 使用的 GitHub 令牌加上 reader 仓库的 Contents 读写';
+      }
+      return msg || '仓库写入失败';
+    }
     return msg || ('HTTP ' + status);
   }
 
