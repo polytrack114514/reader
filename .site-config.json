@@ -18,8 +18,8 @@
     "reader": {
       "name": "阅读器",
       "announcement": "",
-      "closed": false
+      "closed": true
     }
   },
-  "updated": "2026-11-21T08:46:47.658Z"
+  "updated": "2026-11-21T08:49:04.034Z"
 }
