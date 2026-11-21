@@ -7,7 +7,7 @@
     },
     "cloud2": {
       "name": "云盘2",
-      "announcement": "",
+      "announcement": "现在【只能装8GB】，后续会扩展",
       "closed": false
     },
     "img": {
@@ -21,5 +21,5 @@
       "closed": true
     }
   },
-  "updated": "2026-11-21T08:52:16.121Z"
+  "updated": "2026-11-21T08:55:07.572Z"
 }
