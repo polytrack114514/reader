@@ -149,14 +149,15 @@
   .drop-sub { color: var(--muted); font-size: 12.5px; margin-top: 5px; }
 
   .urlrow { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-  .urlrow input {
+  .urlrow input, .tokenrow input, .uploadrow input {
     flex: 1; min-width: 220px; background: var(--surface-2); color: var(--text);
     border: 1px solid var(--border); border-radius: 10px;
     padding: 10px 13px; font-size: 13px; font-family: inherit; outline: none;
     transition: border-color .16s, box-shadow .16s;
   }
-  .urlrow input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
-  .urlrow input::placeholder { color: #5c6474; }
+  .urlrow input:focus, .tokenrow input:focus, .uploadrow input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .urlrow input::placeholder, .tokenrow input::placeholder, .uploadrow input::placeholder { color: #5c6474; }
+  .uploadrow input#uploadDir { flex: 0 1 200px; min-width: 150px; }
 
   .kinds { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 14px; }
   .kind {
@@ -327,6 +328,78 @@
   :root[data-theme="light"] .theme-sun { display: block; }
   :root[data-theme="light"] .theme-moon { display: none; }
 
+  /* 本地文件夹 / 仓库文件 */
+  .localbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .tree {
+    margin-top: 12px; border: 1px solid var(--border); border-radius: 10px;
+    background: var(--surface-2); padding: 6px; max-height: 340px; overflow: auto;
+    font-size: 13px;
+  }
+  .tree details { margin: 0; }
+  .tree summary {
+    list-style: none; cursor: pointer; padding: 5px 8px; border-radius: 7px;
+    color: var(--text); display: flex; align-items: center; gap: 7px;
+  }
+  .tree summary::-webkit-details-marker { display: none; }
+  .tree summary:before {
+    content: ''; width: 0; height: 0; flex: none;
+    border-left: 5px solid var(--muted);
+    border-top: 4px solid transparent; border-bottom: 4px solid transparent;
+    transition: transform .15s;
+  }
+  .tree details[open] > summary:before { transform: rotate(90deg); }
+  .tree summary:hover { background: var(--surface-3); }
+  .tree .tchildren { margin-left: 14px; border-left: 1px dashed var(--border); padding-left: 4px; }
+  .tree .tfile {
+    width: 100%; display: flex; align-items: center; gap: 8px;
+    padding: 5px 8px; border: 0; background: transparent; color: var(--muted);
+    border-radius: 7px; font: inherit; font-size: 12.5px; cursor: pointer; text-align: left;
+  }
+  .tree .tfile:hover { background: var(--surface-3); color: var(--text); }
+  .tree .tname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tree .tsize { flex: none; font-size: 11px; color: var(--muted); }
+  .tree .tmore { padding: 6px 8px; color: var(--warn); font-size: 12px; }
+
+  .repolist {
+    display: flex; flex-direction: column; gap: 4px; margin-top: 12px;
+    max-height: 240px; overflow: auto; border: 1px solid var(--border);
+    border-radius: 10px; background: var(--surface-2); padding: 6px;
+  }
+  .repolist .rf {
+    display: flex; gap: 8px; align-items: center; width: 100%;
+    border: 0; background: transparent; color: var(--text); font: inherit;
+    font-size: 12.5px; padding: 6px 8px; border-radius: 7px; cursor: pointer; text-align: left;
+  }
+  .repolist .rf:hover { background: var(--surface-3); }
+  .repolist .rpath {
+    flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+  .repolist .rsize { flex: none; font-size: 11px; color: var(--muted); }
+  .repolist .rempty { color: var(--muted); text-align: center; padding: 16px; font-size: 12.5px; }
+  .repolist .rerr { color: var(--err); font-size: 12.5px; padding: 10px; line-height: 1.7; }
+
+  .sect { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .sect-title { font-size: 12.5px; font-weight: 620; margin-bottom: 10px; }
+  .tokenrow, .uploadrow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .uploadrow { margin-top: 10px; }
+  .check { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--muted); cursor: pointer; }
+  .check input { accent-color: var(--accent); }
+  .hint-sm { color: var(--muted); font-size: 11.5px; margin-top: 8px; line-height: 1.7; }
+  .hint-sm b { color: var(--text); }
+  .ulog { display: flex; flex-direction: column; gap: 4px; margin-top: 10px; }
+  .ulog .urow {
+    display: flex; gap: 10px; align-items: center; font-size: 12px;
+    padding: 6px 9px; border-radius: 8px; background: var(--surface-2);
+    border: 1px solid var(--border);
+  }
+  .ulog .uname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ulog .ustat { flex: none; font-size: 11.5px; color: var(--muted); }
+  .ulog .urow.ok .ustat { color: var(--ok); }
+  .ulog .urow.err .ustat { color: var(--err); }
+  .ulog .ustat a { color: var(--accent); text-decoration: none; }
+  .ulog .ustat a:hover { text-decoration: underline; }
+
   /* 代码高亮 */
   .hljs-comment, .hljs-quote { color: var(--hl-com); font-style: italic; }
   .hljs-keyword, .hljs-selector-tag, .hljs-literal, .hljs-doctag, .hljs-meta .hljs-keyword { color: var(--hl-key); }
@@ -420,6 +493,54 @@
       <div class="tips">
         <b>提示：</b>链接需要目标服务器允许跨域（CORS）才能读取，云盘2 的下载地址已支持。
         也可以直接把文件拖进来，或者先下载到本地再打开。
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">本地文件夹</div>
+        <div class="card-sub" id="localStat">选择文件夹后可浏览目录</div>
+      </div>
+      <div class="localbar">
+        <button class="btn sm" id="pickFolderBtn" type="button">浏览文件夹</button>
+        <button class="btn sm ghost" id="pickLocalBtn" type="button">选择单个文件</button>
+        <button class="btn sm ghost" id="clearFolderBtn" type="button" hidden>清除</button>
+      </div>
+      <input type="file" id="folderInput" webkitdirectory multiple hidden />
+      <div class="tree" id="localTree" hidden></div>
+      <div class="hint-sm" id="localHint">文件仍在本机，不会上传；点击文件即可阅读。</div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">阅读器仓库</div>
+        <div class="card-sub">polytrack114514/reader</div>
+      </div>
+      <div class="localbar">
+        <button class="btn sm ghost" id="refreshRepoBtn" type="button">刷新文件列表</button>
+        <a class="btn sm ghost" href="https://github.com/polytrack114514/reader" target="_blank" rel="noopener">打开仓库</a>
+      </div>
+      <div class="repolist" id="repoList"><div class="rempty">正在读取…</div></div>
+
+      <div class="sect">
+        <div class="sect-title">上传文件到仓库</div>
+        <div class="tokenrow">
+          <input id="tokenInput" type="password" spellcheck="false" autocomplete="off"
+            placeholder="GitHub 令牌（Token），需要 reader 仓库的 Contents 读写权限" />
+          <button class="btn sm" id="saveTokenBtn" type="button">保存令牌</button>
+          <button class="btn sm ghost" id="clearTokenBtn" type="button">清除</button>
+        </div>
+        <div class="hint-sm" id="tokenState">令牌只保存在本机浏览器，仅用于调用 GitHub API。</div>
+        <div class="uploadrow">
+          <button class="btn sm" id="pickUploadBtn" type="button">选择要上传的文件</button>
+          <input type="file" id="uploadInput" multiple hidden />
+          <input id="uploadDir" type="text" value="uploads" spellcheck="false" autocomplete="off"
+            placeholder="目标文件夹，留空为根目录" />
+          <label class="check"><input type="checkbox" id="overwriteChk" /> 覆盖同名</label>
+          <button class="btn sm" id="uploadBtn" type="button">上传</button>
+        </div>
+        <div class="hint-sm" id="uploadPicked">还没有选择文件</div>
+        <div class="ulog" id="uploadLog"></div>
       </div>
     </div>
 
@@ -559,11 +680,32 @@ files.forEach((name) => {
     themeBtn: $('#themeBtn'),
     toast: $('#toast'),
     dropmask: $('#dropmask'),
+    localStat: $('#localStat'),
+    localTree: $('#localTree'),
+    localHint: $('#localHint'),
+    folderInput: $('#folderInput'),
+    pickFolderBtn: $('#pickFolderBtn'),
+    pickLocalBtn: $('#pickLocalBtn'),
+    clearFolderBtn: $('#clearFolderBtn'),
+    repoList: $('#repoList'),
+    refreshRepoBtn: $('#refreshRepoBtn'),
+    tokenInput: $('#tokenInput'),
+    saveTokenBtn: $('#saveTokenBtn'),
+    clearTokenBtn: $('#clearTokenBtn'),
+    tokenState: $('#tokenState'),
+    pickUploadBtn: $('#pickUploadBtn'),
+    uploadInput: $('#uploadInput'),
+    uploadDir: $('#uploadDir'),
+    overwriteChk: $('#overwriteChk'),
+    uploadBtn: $('#uploadBtn'),
+    uploadPicked: $('#uploadPicked'),
+    uploadLog: $('#uploadLog'),
   };
 
   var state = {
     name: '', kind: '', text: '', size: 0,
-    blobUrl: null, baseUrl: null, fromUrl: null, source: false
+    blobUrl: null, baseUrl: null, fromUrl: null, source: false,
+    localRoot: null, repoFiles: []
   };
 
   var IMAGE = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'avif', 'bmp', 'ico', 'svg'];
@@ -584,6 +726,11 @@ files.forEach((name) => {
     less: 'less', yml: 'yaml', yaml: 'yaml', toml: 'ini', ini: 'ini', conf: 'ini',
     md: 'markdown', markdown: 'markdown', mdx: 'markdown', diff: 'diff', patch: 'diff'
   };
+
+  var REPO = { owner: 'polytrack114514', name: 'reader', branch: 'main' };
+  var TOKEN_KEY = 'rd_token';
+  var MAX_UPLOAD = 25 * 1024 * 1024;
+  var MAX_SCAN = 3000;
 
   if (window.DOMPurify) {
     DOMPurify.addHook('afterSanitizeAttributes', function (node) {
@@ -1066,6 +1213,360 @@ files.forEach((name) => {
     });
   }
 
+  /* ---------- 本地文件夹 ---------- */
+  async function scanHandle(dir, path, depth, acc) {
+    var node = { kind: 'dir', name: dir.name, path: path, children: [] };
+    if (depth > 8) { node.more = true; return node; }
+    for await (var entry of dir.entries()) {
+      if (acc.count > MAX_SCAN) { node.more = true; break; }
+      acc.count++;
+      var name = entry[0];
+      var h = entry[1];
+      if (h.kind === 'directory') {
+        node.children.push(await scanHandle(h, path + '/' + name, depth + 1, acc));
+      } else {
+        var f = null;
+        try { f = await h.getFile(); } catch (e) { continue; }
+        node.children.push({ kind: 'file', name: name, path: path + '/' + name, handle: h, size: f.size });
+      }
+    }
+    return node;
+  }
+
+  function treeFromFiles(files) {
+    var first = files[0].webkitRelativePath || files[0].name;
+    var rootName = first.split('/')[0] || '本地文件夹';
+    var root = { kind: 'dir', name: rootName, path: rootName, children: [] };
+    files.forEach(function (f) {
+      var rel = f.webkitRelativePath || f.name;
+      var parts = rel.split('/');
+      if (parts[0] === rootName) parts.shift();
+      var cur = root;
+      for (var i = 0; i < parts.length - 1; i++) {
+        var nm = parts[i];
+        var found = null;
+        for (var j = 0; j < cur.children.length; j++) {
+          if (cur.children[j].kind === 'dir' && cur.children[j].name === nm) { found = cur.children[j]; break; }
+        }
+        if (!found) {
+          found = { kind: 'dir', name: nm, path: cur.path + '/' + nm, children: [] };
+          cur.children.push(found);
+        }
+        cur = found;
+      }
+      var fname = parts[parts.length - 1] || f.name;
+      cur.children.push({ kind: 'file', name: fname, path: cur.path + '/' + fname, file: f, size: f.size });
+    });
+    return root;
+  }
+
+  function countFiles(node) {
+    var n = 0;
+    (node.children || []).forEach(function (c) {
+      if (c.kind === 'file') n++;
+      else n += countFiles(c);
+    });
+    return n;
+  }
+
+  function renderTree(node, box, depth) {
+    var kids = (node.children || []).slice().sort(function (a, b) {
+      if (a.kind !== b.kind) return a.kind === 'dir' ? -1 : 1;
+      return a.name.localeCompare(b.name, 'zh-CN');
+    });
+    kids.forEach(function (child) {
+      if (child.kind === 'dir') {
+        var d = document.createElement('details');
+        if (depth < 1) d.open = true;
+        var s = document.createElement('summary');
+        s.textContent = child.name;
+        d.appendChild(s);
+        var inner = document.createElement('div');
+        inner.className = 'tchildren';
+        d.appendChild(inner);
+        renderTree(child, inner, depth + 1);
+        box.appendChild(d);
+      } else {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tfile';
+        b.title = child.path;
+        var n = document.createElement('span');
+        n.className = 'tname';
+        n.textContent = child.name;
+        var sz = document.createElement('span');
+        sz.className = 'tsize';
+        sz.textContent = fmtSize(child.size || 0);
+        b.appendChild(n);
+        b.appendChild(sz);
+        b.addEventListener('click', function () { openLocalNode(child); });
+        box.appendChild(b);
+      }
+    });
+    if (node.more) {
+      var m = document.createElement('div');
+      m.className = 'tmore';
+      m.textContent = '目录较大，仅显示一部分内容';
+      box.appendChild(m);
+    }
+  }
+
+  function renderLocalTree() {
+    var root = state.localRoot;
+    els.localTree.replaceChildren();
+    els.clearFolderBtn.hidden = !root;
+    if (!root) {
+      els.localTree.hidden = true;
+      els.localStat.textContent = '选择文件夹后可浏览目录';
+      els.localHint.textContent = '文件仍在本机，不会上传；点击文件即可阅读。';
+      return;
+    }
+    els.localTree.hidden = false;
+    els.localStat.textContent = root.name + ' · ' + countFiles(root) + ' 个文件';
+    els.localHint.textContent = '文件仍在本机，不会上传；点击文件即可阅读。';
+    renderTree(root, els.localTree, 0);
+  }
+
+  async function openLocalNode(node) {
+    clearBanner();
+    try {
+      var file = node.file;
+      if (!file && node.handle) file = await node.handle.getFile();
+      if (!file) throw new Error('无法读取文件');
+      await openBlob(file, node.name, null);
+    } catch (e) {
+      showBanner('读取文件失败：' + (e && e.message ? e.message : '未知错误'));
+    }
+  }
+
+  async function pickFolder() {
+    clearBanner();
+    if (!window.showDirectoryPicker) {
+      els.folderInput.click();
+      return;
+    }
+    try {
+      var dir = await window.showDirectoryPicker({ mode: 'read' });
+      els.localStat.textContent = '正在读取目录…';
+      var acc = { count: 0 };
+      var root = await scanHandle(dir, dir.name, 0, acc);
+      state.localRoot = root;
+      renderLocalTree();
+    } catch (e) {
+      if (e && e.name === 'AbortError') return;
+      showBanner('读取文件夹失败：' + (e && e.message ? e.message : '未知错误'));
+    }
+  }
+
+  /* ---------- 阅读器仓库 ---------- */
+  function getToken() {
+    try { return localStorage.getItem(TOKEN_KEY) || ''; } catch (e) { return ''; }
+  }
+
+  function apiHeaders(extra) {
+    var h = {
+      'Accept': 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    };
+    var t = getToken();
+    if (t) h.Authorization = 'Bearer ' + t;
+    if (extra) for (var k in extra) h[k] = extra[k];
+    return h;
+  }
+
+  function repoRawUrl(path) {
+    return 'https://raw.githubusercontent.com/' + REPO.owner + '/' + REPO.name + '/' + REPO.branch + '/' +
+      path.split('/').map(encodeURIComponent).join('/');
+  }
+
+  function renderTokenState() {
+    var t = getToken();
+    els.tokenInput.value = '';
+    if (t) {
+      els.tokenInput.placeholder = '已保存令牌（输入新令牌可替换）';
+      els.tokenState.textContent = '已保存令牌（仅本机），可以上传文件。';
+    } else {
+      els.tokenInput.placeholder = 'GitHub 令牌（Token），需要 reader 仓库的 Contents 读写权限';
+      els.tokenState.textContent = '令牌只保存在本机浏览器，仅用于调用 GitHub API。';
+    }
+  }
+
+  function renderRepoFiles() {
+    els.repoList.replaceChildren();
+    if (!state.repoFiles.length) {
+      var d = document.createElement('div');
+      d.className = 'rempty';
+      d.textContent = '仓库里还没有文件。';
+      els.repoList.appendChild(d);
+      return;
+    }
+    state.repoFiles.slice(0, 500).forEach(function (it) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'rf';
+      b.title = '打开 ' + it.path;
+      var p = document.createElement('span');
+      p.className = 'rpath';
+      p.textContent = it.path;
+      var s = document.createElement('span');
+      s.className = 'rsize';
+      s.textContent = fmtSize(it.size || 0);
+      b.appendChild(p);
+      b.appendChild(s);
+      b.addEventListener('click', function () { openUrl(repoRawUrl(it.path)); });
+      els.repoList.appendChild(b);
+    });
+    if (state.repoFiles.length > 500) {
+      var more = document.createElement('div');
+      more.className = 'rempty';
+      more.textContent = '文件较多，仅显示前 500 个。';
+      els.repoList.appendChild(more);
+    }
+  }
+
+  async function loadRepoFiles() {
+    els.repoList.replaceChildren();
+    var loading = document.createElement('div');
+    loading.className = 'rempty';
+    loading.textContent = '正在读取…';
+    els.repoList.appendChild(loading);
+    try {
+      var r = await fetch('https://api.github.com/repos/' + REPO.owner + '/' + REPO.name +
+        '/git/trees/' + REPO.branch + '?recursive=1', { headers: apiHeaders() });
+      if (r.status === 403 || r.status === 429) throw new Error('接口限流，保存令牌后可提高额度');
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      var data = await r.json();
+      state.repoFiles = (data.tree || []).filter(function (x) { return x.type === 'blob'; })
+        .sort(function (a, b) { return a.path.localeCompare(b.path, 'zh-CN'); });
+      renderRepoFiles();
+    } catch (e) {
+      els.repoList.replaceChildren();
+      var err = document.createElement('div');
+      err.className = 'rerr';
+      err.textContent = '仓库文件读取失败：' + (e && e.message ? e.message : '未知错误') + '。可点「刷新文件列表」重试。';
+      els.repoList.appendChild(err);
+    }
+  }
+
+  /* ---------- 上传到仓库 ---------- */
+  function fileToBase64(file) {
+    return new Promise(function (resolve, reject) {
+      var fr = new FileReader();
+      fr.onload = function () {
+        var s = String(fr.result || '');
+        var i = s.indexOf(',');
+        resolve(i >= 0 ? s.slice(i + 1) : s);
+      };
+      fr.onerror = function () { reject(fr.error || new Error('读取文件失败')); };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function apiErrorText(status, msg) {
+    if (status === 401) return '令牌无效或已过期';
+    if (status === 403) return '无写入权限（令牌需含 reader 仓库 Contents 读写）';
+    if (status === 404) return '仓库或路径不存在';
+    if (status === 422) return '请求被拒绝（可能同名冲突或文件过大）';
+    return 'HTTP ' + status + (msg ? ' · ' + msg : '');
+  }
+
+  function addLog(name) {
+    var row = document.createElement('div');
+    row.className = 'urow';
+    var n = document.createElement('span');
+    n.className = 'uname';
+    n.textContent = name;
+    var s = document.createElement('span');
+    s.className = 'ustat';
+    s.textContent = '等待…';
+    row.appendChild(n);
+    row.appendChild(s);
+    els.uploadLog.appendChild(row);
+    return { row: row, stat: s };
+  }
+
+  function setLog(item, cls, text) {
+    item.row.className = 'urow ' + cls;
+    item.stat.textContent = text;
+  }
+
+  function setLogDone(item, path) {
+    item.row.className = 'urow ok';
+    item.stat.textContent = '已上传 · ';
+    var a = document.createElement('a');
+    a.href = repoRawUrl(path);
+    a.textContent = '打开';
+    a.target = '_blank';
+    a.rel = 'noopener';
+    item.stat.appendChild(a);
+  }
+
+  async function uploadOne(file, dir, overwrite) {
+    var path = (dir ? dir + '/' : '') + file.name;
+    var item = addLog(path);
+    setLog(item, '', '上传中…');
+    if (file.size > MAX_UPLOAD) {
+      setLog(item, 'err', '超过 25MB，建议使用云盘2');
+      return;
+    }
+    var api = 'https://api.github.com/repos/' + REPO.owner + '/' + REPO.name + '/contents/' +
+      path.split('/').map(encodeURIComponent).join('/');
+    try {
+      var sha = null;
+      var head = await fetch(api, { headers: apiHeaders() });
+      if (head.ok) {
+        if (!overwrite) { setLog(item, 'err', '同名文件已存在'); return; }
+        var meta = await head.json();
+        sha = meta.sha;
+      } else if (head.status !== 404) {
+        throw { status: head.status };
+      }
+      var b64 = await fileToBase64(file);
+      var body = { message: 'Upload ' + path, content: b64, branch: REPO.branch };
+      if (sha) body.sha = sha;
+      var r = await fetch(api, {
+        method: 'PUT',
+        headers: apiHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) {
+        var j = null;
+        try { j = await r.json(); } catch (e) {}
+        throw { status: r.status, message: j && j.message ? j.message : '' };
+      }
+      setLogDone(item, path);
+    } catch (e) {
+      if (e && e.status) setLog(item, 'err', apiErrorText(e.status, e.message));
+      else setLog(item, 'err', '上传失败：' + (e && e.message ? e.message : '未知错误'));
+    }
+  }
+
+  async function uploadAll() {
+    var token = getToken();
+    if (!token) {
+      toast('请先保存 GitHub 令牌');
+      els.tokenInput.focus();
+      return;
+    }
+    var files = Array.prototype.slice.call(els.uploadInput.files || []);
+    if (!files.length) {
+      toast('请先选择要上传的文件');
+      return;
+    }
+    var dir = String(els.uploadDir.value || '').trim().replace(/^\/+|\/+$/g, '');
+    var overwrite = els.overwriteChk.checked;
+    els.uploadBtn.disabled = true;
+    els.uploadLog.replaceChildren();
+    for (var i = 0; i < files.length; i++) {
+      await uploadOne(files[i], dir, overwrite);
+    }
+    els.uploadBtn.disabled = false;
+    els.uploadInput.value = '';
+    els.uploadPicked.textContent = '还没有选择文件';
+    loadRepoFiles();
+  }
+
+
   /* ---------- 事件 ---------- */
   els.drop.addEventListener('click', function () { els.fileInput.click(); });
   els.drop.addEventListener('keydown', function (e) {
@@ -1079,6 +1580,43 @@ files.forEach((name) => {
     if (f) openFile(f);
     els.fileInput.value = '';
   });
+
+  els.pickFolderBtn.addEventListener('click', pickFolder);
+  els.pickLocalBtn.addEventListener('click', function () { els.fileInput.click(); });
+  els.clearFolderBtn.addEventListener('click', function () {
+    state.localRoot = null;
+    renderLocalTree();
+  });
+  els.folderInput.addEventListener('change', function () {
+    var files = Array.prototype.slice.call(els.folderInput.files || []);
+    els.folderInput.value = '';
+    if (!files.length) return;
+    clearBanner();
+    state.localRoot = treeFromFiles(files);
+    renderLocalTree();
+  });
+
+  els.refreshRepoBtn.addEventListener('click', loadRepoFiles);
+  els.saveTokenBtn.addEventListener('click', function () {
+    var t = els.tokenInput.value.trim();
+    if (!t) { toast('请粘贴 GitHub 令牌'); els.tokenInput.focus(); return; }
+    try { localStorage.setItem(TOKEN_KEY, t); } catch (e) {}
+    renderTokenState();
+    toast('令牌已保存到本机');
+    loadRepoFiles();
+  });
+  els.clearTokenBtn.addEventListener('click', function () {
+    try { localStorage.removeItem(TOKEN_KEY); } catch (e) {}
+    renderTokenState();
+    toast('令牌已清除');
+    loadRepoFiles();
+  });
+  els.pickUploadBtn.addEventListener('click', function () { els.uploadInput.click(); });
+  els.uploadInput.addEventListener('change', function () {
+    var n = els.uploadInput.files ? els.uploadInput.files.length : 0;
+    els.uploadPicked.textContent = n ? '已选择 ' + n + ' 个文件' : '还没有选择文件';
+  });
+  els.uploadBtn.addEventListener('click', uploadAll);
 
   ['dragenter', 'dragover'].forEach(function (ev) {
     document.addEventListener(ev, function (e) {
@@ -1164,6 +1702,9 @@ files.forEach((name) => {
 
   /* ---------- 初始化 ---------- */
   renderRecent();
+  renderTokenState();
+  renderLocalTree();
+  loadRepoFiles();
 
   var q = new URLSearchParams(location.search);
   var autoUrl = q.get('url');
