@@ -13,13 +13,13 @@
     "img": {
       "name": "图床",
       "announcement": "",
-      "closed": true
+      "closed": false
     },
     "reader": {
       "name": "阅读器",
       "announcement": "",
-      "closed": true
+      "closed": false
     }
   },
-  "updated": "2026-11-22T12:32:37.204Z"
+  "updated": "2026-11-22T12:33:02.298Z"
 }
